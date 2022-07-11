@@ -10,7 +10,7 @@ const auth = async (req, res, next) => {
         let token = authorization.split(" ")[1]
         try {
             
-            let payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
+            let payload = jwt.verify(token, process.env.SECRET)
             let user = await User.findById(payload.id, "-password -__v")
             if (!user) {
               console.log('User Not Found');

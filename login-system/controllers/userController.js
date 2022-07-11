@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
-const dotenv = require('dotenv');
+require('dotenv').config()
 
 const user = require('../models/loginUser');
 const { successResponse, errorResponse } = require('../utils');
@@ -10,7 +10,6 @@ const loginUser = require('../models/loginUser');
 const login = async (req, res) => {
   try {
 
-    console.log('login controller');
     const emailID = req.body.emailID;
     const password = req.body.password;
 
@@ -27,7 +26,7 @@ const login = async (req, res) => {
     } else {
 
       // jwt token created
-      let accessToken = userData.getToken({exp: 60*60, secret: process.env.ACCESS_TOKEN_SECRET});
+      let accessToken = userData.getToken({exp: 60*60, secret: process.env.SECRET});
       await userData.save();
       console.log('Login Successful');
       return res.status(200).send({ accessToken })
@@ -40,7 +39,6 @@ const login = async (req, res) => {
 const register = async (req, res) => {
   try {
 
-    console.log('register controller');
       const addinguserRecords = new loginUser({
         username: req.body.username,
         phoneNumber: req.body.phoneNumber,
@@ -50,8 +48,6 @@ const register = async (req, res) => {
         gender: req.body.gender,
         avatar: req.file.filename
       })
-
-      console.log(addinguserRecords);
 
       const emailID = req.body.emailID;
 
@@ -64,7 +60,6 @@ const register = async (req, res) => {
 
         // register new user
         const insert = await addinguserRecords.save();
-        console.log(insert);
         console.log('Registration Successful');
         return successResponse(req, res, insert, 200);
       }
@@ -76,11 +71,8 @@ const register = async (req, res) => {
 const viewProfile = async (req, res) => {
   try{
 
-    console.log('viewProfile controller');
-    const id = req.user._id
-    console.log(req.user._id);
-    const userData = await loginUser.findOne({ _id : id});
-
+    const userData = req.user;
+    console.log(req.user);
     // check if data is exist or not
     if(!userData){
       return errorResponse(req, res, 'User Not Found', 404);
@@ -92,16 +84,5 @@ const viewProfile = async (req, res) => {
   }
 };
 
-const logout = async (req, res) => {
-  try{
-    console.log('logout controller');
-    accessToken = NULL;
-    console.log('Logout Successful');
-    return successResponse(req, res, 'logout successfully', 200);
-  } catch (error) {
-    return errorResponse(req, res, error.message, error, 500);
-  }
-};
 
-
-module.exports = {  login, register, viewProfile, logout  };
+module.exports = {  login, register, viewProfile };
